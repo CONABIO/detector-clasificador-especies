@@ -1,5 +1,5 @@
 import pandas as pd
-from camtraproc.settings import AWS_SERVER_PUBLIC_KEY, AWS_SERVER_SECRET_KEY, ITEM_LIST_ENDPOINT, USER, PSSWD
+from camtraproc.settings import AWS_SERVER_PUBLIC_KEY, AWS_SERVER_SECRET_KEY, ITEM_TYPE, ITEM_LIST_ENDPOINT, USER, PSSWD
 import boto3
 import json
 import requests
@@ -41,9 +41,27 @@ def query_s3(bucket,path,pattern,out_path,region='us-west-2'):
     return df
 
 def query_irekua(out_path):
-    data = requests.get(ITEM_LIST_ENDPOINT, auth=(USER, PSSWD)).json()
-    df = pd.DataFrame(data['results'])[['id','item_file']]
-    df['latlong'] = ['19.0650555556|-96.909' for f in range(len(df))]
+    filters = {
+    'item_type':ITEM_TYPE
+    }
+    data = requests.get(ITEM_LIST_ENDPOINT, auth=(USER, PSSWD), params=filters).json()
+    results = data['results']
+    ep = data['next']
+    while ep:
+        data = requests.get(ep,auth=(USERNAME, PASSWORD)).json()
+        results = results + data['results']
+        ep = data['next']
+    
+    df = pd.DataFrame(results)[['id','item_file','collection_site']]
+    df['site_id'] = df.apply(lambda x: x.collection_site['id'], axis=1)
+    df['site_url'] = df.apply(lambda x: x.collection_site['url'], axis=1)
+    df2 = df[['site_id','site_url']].drop_duplicates()
+    df2['site'] = df2.apply(lambda x: requests.get(x.site_url,auth=(USERNAME, PASSWORD)).json(), axis=1)
+    df2['latlong'] = df2.apply(lambda x: '{:.{n}f}'.format(x.site[0]['site']['geometry']['coordinates'][1],n=7) +
+                           '|' + '{:.{n}f}'.format(x.site[0]['site']['geometry']['coordinates'][0],n=7), axis=1)
+    df2 = df2[['site_id','latlong']]
+    df = df.merge(df2,how='left',on='site_id')
+    df = df[['id','item_file','latlong']]
     df.to_csv(os.path.join(out_path,'query_irekua.csv'), index=False)
     with open(os.path.join(out_path,'query_irekua.json'), 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
