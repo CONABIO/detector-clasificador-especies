@@ -48,7 +48,7 @@ def query_irekua(out_path):
     results = data['results']
     ep = data['next']
     while ep:
-        data = requests.get(ep,auth=(USERNAME, PASSWORD)).json()
+        data = requests.get(ep,auth=(USER, PSSWD)).json()
         results = results + data['results']
         ep = data['next']
     
@@ -56,7 +56,7 @@ def query_irekua(out_path):
     df['site_id'] = df.apply(lambda x: x.collection_site['id'], axis=1)
     df['site_url'] = df.apply(lambda x: x.collection_site['url'], axis=1)
     df2 = df[['site_id','site_url']].drop_duplicates()
-    df2['site'] = df2.apply(lambda x: requests.get(x.site_url,auth=(USERNAME, PASSWORD)).json(), axis=1)
+    df2['site'] = df2.apply(lambda x: requests.get(x.site_url,auth=(USER, PSSWD)).json(), axis=1)
     df2['latlong'] = df2.apply(lambda x: '{:.{n}f}'.format(x.site[0]['site']['geometry']['coordinates'][1],n=7) +
                            '|' + '{:.{n}f}'.format(x.site[0]['site']['geometry']['coordinates'][0],n=7), axis=1)
     df2 = df2[['site_id','latlong']]
