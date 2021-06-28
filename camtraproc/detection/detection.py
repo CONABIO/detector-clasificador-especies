@@ -218,7 +218,10 @@ def get_frames(key,df,bucket):
         df1 = df.copy()
         df1['item_file'] = os.path.basename(df['item_file']).split('.')[0] + '_{}.JPG'.format(f)
         return df1
-    url = get_url_s3(bucket,key)
+    if bucket != 'irekua':
+        url = get_url_s3(bucket,key)
+    else:
+        url = df['item_file']
     cap = cv2.VideoCapture(url)
     frames = []
     while True:
