@@ -56,7 +56,7 @@ if len(df1) > 0:
 
 
     model = Model(1e-07)
-#    index, bb_list, pred_list, conf_list, taxa_list, pred_bayes_list, conf_bayes_list, taxa_bayes_list = model.predict_taxa(df1, coor_generator)
+#    index, bb_list, pred_list, score_list, taxa_list, pred_bayes_list, score_bayes_list, taxa_bayes_list = model.predict_taxa(df1, coor_generator)
     index_list, all_array = model.predict_taxa(df1, coor_generator)
 
     dff = pd.DataFrame([p for f in index_list for p in f], columns=['index'])
@@ -64,20 +64,20 @@ if len(df1) > 0:
     dff['frame'] = [int(p[0].split('_')[-2]) for p in all_array]
     dff['bboxes'] = [p[1:5] for p in all_array]
     dff['pred1'] = [dfca[dfca['category_id'] == p[7]][p[9] + '_name'].values[0] if p[7] is not None else None for p in all_array]
-    dff['confidence1'] = [p[8] for p in all_array]
+    dff['score1'] = [p[8] for p in all_array]
     dff['taxa_level1'] = [p[9] for p in all_array]
     dff['pred2'] = [dfca[dfca['category_id'] == p[10]][p[12] + '_name'].values[0]  if p[10] is not None else None for p in all_array]
-    dff['confidence2'] = [p[11] for p in all_array]
+    dff['score2'] = [p[11] for p in all_array]
     dff['taxa_level2'] = [p[12] for p in all_array]
     dff['pred3'] = [dfca[dfca['category_id'] == p[13]][p[15] + '_name'].values[0] if p[13] is not None else None for p in all_array]
-    dff['confidence3'] = [p[14] for p in all_array]
+    dff['score3'] = [p[14] for p in all_array]
     dff['taxa_level3'] = [p[15] for p in all_array]
     dff['pred4'] = [dfca[dfca['category_id'] == p[16]][p[18] + '_name'].values[0] if p[16] is not None else None for p in all_array]
-    dff['confidence4'] = [p[17] for p in all_array]
+    dff['score4'] = [p[17] for p in all_array]
     dff['taxa_level4'] = [p[18] for p in all_array]
-    dff['pred1'] = [dfca[dfca['category_id'] == p[19]][p[21] + '_name'].values[0] if p[19] is not None else None for p in all_array]
-    dff['confidence1'] = [p[20] for p in all_array]
-    dff['taxa_level1'] = [p[21] for p in all_array]
+    dff['pred5'] = [dfca[dfca['category_id'] == p[19]][p[21] + '_name'].values[0] if p[19] is not None else None for p in all_array]
+    dff['score5'] = [p[20] for p in all_array]
+    dff['taxa_level5'] = [p[21] for p in all_array]
 
 
     if len(dff) > 0:
@@ -93,7 +93,7 @@ if len(df2) > 0:
                                              seed=7233422)
 
     model = SimpleModel(1e-07)
-    index, bb_list, pred_list, conf_list, taxa_list = model.predict_taxa(df2, generator)
+    index, bb_list, pred_list, score_list, taxa_list = model.predict_taxa(df2, generator)
 
     dff = None
     dff = pd.DataFrame([p for f in index for p in f], columns=['index'])
@@ -101,7 +101,7 @@ if len(df2) > 0:
     dff['frame'] = [int(p[0].split('_')[-2]) for f in bb_list for p in f]
     dff['bboxes'] = [p[1:] for f in bb_list for p in f]
     dff['pred1'] = pred_list
-    dff['confidence1'] = conf_list
+    dff['score1'] = score_list
     dff['taxa_level1'] = taxa_list
 
     if len(dff) > 0:

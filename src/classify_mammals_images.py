@@ -67,7 +67,7 @@ if len(df1) > 0:
     _ = model.predict(df1, feat_generator, bboxes_dir)
 
     coor_generator = Features_generator_ex_coo_dist_pot_from_dataframe(dataframe=df1bb, directory=bboxes_dir,
-                                             x_col=['id','item_file','x','y','w','h','prob_ex_coor','dist_pot','conf'],
+                                             x_col=['id','item_file','x','y','w','h','prob_ex_coor','dist_pot','score'],
 #                                             y_col=,
                                              batch_size=CLASSIFIER_BATCH_SIZE,
                                              seed=7233422)
@@ -83,22 +83,22 @@ if len(df1) > 0:
     dff['y'] = [p[3] for p in all_array]
     dff['w'] = [p[4] for p in all_array]
     dff['h'] = [p[5] for p in all_array]
-    dff['bboxes_conf'] = [p[8] for p in all_array]
+    dff['bboxes_score'] = [p[8] for p in all_array]
     dff['pred1'] = [dfca[dfca['category_id'] == p[9]][p[11] + '_name'].values[0] if p[9] is not None else None for p in all_array]
-    dff['confidence1'] = [p[10] for p in all_array]
+    dff['score1'] = [p[10] for p in all_array]
     dff['taxa_level1'] = [p[11] for p in all_array]
     dff['pred2'] = [dfca[dfca['category_id'] == p[12]][p[14] + '_name'].values[0]  if p[12] is not None else None for p in all_array]
-    dff['confidence2'] = [p[13] for p in all_array]
+    dff['score2'] = [p[13] for p in all_array]
     dff['taxa_level2'] = [p[14] for p in all_array]
     dff['pred3'] = [dfca[dfca['category_id'] == p[15]][p[17] + '_name'].values[0] if p[15] is not None else None for p in all_array]
-    dff['confidence3'] = [p[16] for p in all_array]
+    dff['score3'] = [p[16] for p in all_array]
     dff['taxa_level3'] = [p[17] for p in all_array]
     dff['pred4'] = [dfca[dfca['category_id'] == p[18]][p[20] + '_name'].values[0] if p[18] is not None else None for p in all_array]
-    dff['confidence4'] = [p[19] for p in all_array]
+    dff['score4'] = [p[19] for p in all_array]
     dff['taxa_level4'] = [p[20] for p in all_array]
-    dff['pred1'] = [dfca[dfca['category_id'] == p[21]][p[23] + '_name'].values[0] if p[21] is not None else None for p in all_array]
-    dff['confidence1'] = [p[22] for p in all_array]
-    dff['taxa_level1'] = [p[23] for p in all_array]
+    dff['pred5'] = [dfca[dfca['category_id'] == p[21]][p[23] + '_name'].values[0] if p[21] is not None else None for p in all_array]
+    dff['score5'] = [p[22] for p in all_array]
+    dff['taxa_level5'] = [p[23] for p in all_array]
 
 
     if len(dff) > 0:
@@ -119,7 +119,7 @@ if len(df2) > 0:
             cv2.imwrite(os.path.join(bboxes_dir, r[0].split('.')[0] + '_bb0.' + r[0].split('.')[1]), image_to_write)
 
     generator = Features_generator_from_dataframe(dataframe=df2bb, directory=bboxes_dir,
-                                             x_col=['id','item_file','x','y','w','h','conf'],
+                                             x_col=['id','item_file','x','y','w','h','score'],
 #                                             y_col=['category_id'],
                                              batch_size=CLASSIFIER_BATCH_SIZE,
                                              target_size=TARGET_SIZE,
@@ -137,9 +137,9 @@ if len(df2) > 0:
     dff['y'] = [p[3] for p in all_array]
     dff['w'] = [p[4] for p in all_array]
     dff['h'] = [p[5] for p in all_array]
-    dff['bboxes_conf'] = [p[6] for p in all_array]
+    dff['bboxes_score'] = [p[6] for p in all_array]
     dff['pred'] = [dfca[dfca['category_id'] == p[7]][p[9] + '_name'].values[0] if p[7] is not None else None for p in all_array]
-    dff['confidence'] = [p[8] for p in all_array]
+    dff['score'] = [p[8] for p in all_array]
     dff['taxa_level'] = [p[9] for p in all_array]
 
     if len(dff) > 0:

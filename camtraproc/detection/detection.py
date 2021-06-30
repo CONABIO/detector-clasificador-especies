@@ -40,7 +40,7 @@ def get_species_and_humans_indexes(detection_classes,scores,boxes,threshold):
     return species, humans, maybe_humans
 
 def get_dataframe(df,ind_bboxes):
-    confidence = []
+    score = []
     x = []
     y = []
     w = []
@@ -53,7 +53,7 @@ def get_dataframe(df,ind_bboxes):
     if type(df['item_file']) == str:
         for b in range(len(ind_bboxes)):
             for i in range(ind_bboxes[b][1].shape[0]):
-                confidence.append(ind_bboxes[b][2][0])
+                score.append(ind_bboxes[b][2][0])
                 x.append(ind_bboxes[b][1][i,1])
                 y.append(ind_bboxes[b][1][i,0])
                 w.append(ind_bboxes[b][1][i,3]-ind_bboxes[b][1][i,1])
@@ -65,7 +65,7 @@ def get_dataframe(df,ind_bboxes):
     else:
         for b in range(len(ind_bboxes)):
             for i in range(ind_bboxes[b][1].shape[0]):
-                confidence.append(ind_bboxes[b][2][0])
+                score.append(ind_bboxes[b][2][0])
                 x.append(ind_bboxes[b][1][i,1])
                 y.append(ind_bboxes[b][1][i,0])
                 w.append(ind_bboxes[b][1][i,3]-ind_bboxes[b][1][i,1])
@@ -81,7 +81,7 @@ def get_dataframe(df,ind_bboxes):
     ndf['y'] = y
     ndf['w'] = w
     ndf['h'] = h
-    ndf['conf'] = confidence
+    ndf['score'] = score
     ndf['latlong'] = latlong
     return ndf
 

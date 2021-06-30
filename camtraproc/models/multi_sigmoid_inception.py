@@ -152,29 +152,29 @@ class MultiModel(BaseModel):
 #        predict_li = [p for f in predict_list for p in f]
         bb_array = np.concatenate(bb_list, axis=0)
         #17_2c
-        pred_list1, conf_list1, taxa_list1 = get_tuple_list([predict_list[f][i][0]*bb_list[f][i][5] 
+        pred_list1, score_list1, taxa_list1 = get_tuple_list([predict_list[f][i][0]*bb_list[f][i][5] 
                                                  for f in range(len(predict_list)) for i in range(len(predict_list[f]))],0.99,0.54,0.09)
         #17_2
-        pred_list2, conf_list2, taxa_list2 = get_tuple_list([i[1] for f in predict_list for i in f],0.985,0.92,0.71)
+        pred_list2, score_list2, taxa_list2 = get_tuple_list([i[1] for f in predict_list for i in f],0.985,0.92,0.71)
         #17
-        pred_list3, conf_list3, taxa_list3 = get_tuple_list([i[2] for f in predict_list for i in f],0.98,0.89,0.71)
+        pred_list3, score_list3, taxa_list3 = get_tuple_list([i[2] for f in predict_list for i in f],0.98,0.89,0.71)
         #13
-        pred_list4, conf_list4, taxa_list4 = get_tuple_list([i[3] for f in predict_list for i in f],0.96,0.91,0.6)
+        pred_list4, score_list4, taxa_list4 = get_tuple_list([i[3] for f in predict_list for i in f],0.96,0.91,0.6)
         #13_2
-        pred_list5, conf_list5, taxa_list5 = get_tuple_list([i[4] for f in predict_list for i in f],0.99,0.96,0.67)
+        pred_list5, score_list5, taxa_list5 = get_tuple_list([i[4] for f in predict_list for i in f],0.99,0.96,0.67)
 #        predict_bayes_li = [p for f in predict_bayes_list for p in f]
-        all_array = np.concatenate([bb_array,np.array(pred_list1)[:,None],np.array(conf_list1)[:,None],np.array(taxa_list1)[:,None],
-                                    np.array(pred_list2)[:,None],np.array(conf_list2)[:,None],np.array(taxa_list2)[:,None],
-                                    np.array(pred_list3)[:,None],np.array(conf_list3)[:,None],np.array(taxa_list3)[:,None],
-                                    np.array(pred_list4)[:,None],np.array(conf_list4)[:,None],np.array(taxa_list4)[:,None],
-                                    np.array(pred_list5)[:,None],np.array(conf_list5)[:,None],np.array(taxa_list5)[:,None]], axis=1)
+        all_array = np.concatenate([bb_array,np.array(pred_list1)[:,None],np.array(score_list1)[:,None],np.array(taxa_list1)[:,None],
+                                    np.array(pred_list2)[:,None],np.array(score_list2)[:,None],np.array(taxa_list2)[:,None],
+                                    np.array(pred_list3)[:,None],np.array(score_list3)[:,None],np.array(taxa_list3)[:,None],
+                                    np.array(pred_list4)[:,None],np.array(score_list4)[:,None],np.array(taxa_list4)[:,None],
+                                    np.array(pred_list5)[:,None],np.array(score_list5)[:,None],np.array(taxa_list5)[:,None]], axis=1)
 #        assert(len(predict_li) > 0)
 #        assert(len(predict_bayes_li) > 0)
         # check thresholds
-#        pred_list, conf_list, taxa_list = get_tuple_list(predict_li,0.97,0.52,0.08)
-#        pred_bayes_list, conf_bayes_list, taxa_bayes_list = get_tuple_list(predict_bayes_li,0.97,0.52,0.08)
+#        pred_list, score_list, taxa_list = get_tuple_list(predict_li,0.97,0.52,0.08)
+#        pred_bayes_list, score_bayes_list, taxa_bayes_list = get_tuple_list(predict_bayes_li,0.97,0.52,0.08)
 
-#        return index, bb_list, pred_list, conf_list, taxa_list, pred_bayes_list, conf_bayes_list, taxa_bayes_list
+#        return index, bb_list, pred_list, score_list, taxa_list, pred_bayes_list, score_bayes_list, taxa_bayes_list
         if validate:
             return all_array, label_list
         else:

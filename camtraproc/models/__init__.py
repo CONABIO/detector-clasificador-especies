@@ -102,13 +102,13 @@ def get_tuple_list(predict_li,threshold1=None,threshold2=None,threshold3=None):
 
     if len(tuple_list) > 0:
         pred_list = [int(tu[0]) if tu[0] is not None else tu[0] for tu in tuple_list]
-        conf_list = [tu[1] for tu in tuple_list]
+        score_list = [tu[1] for tu in tuple_list]
         taxa_list = [tu[2] for tu in tuple_list]
 
     else:
         pred_list = []
-        conf_list = []
+        score_list = []
         taxa_list = []
 
-    return pred_list, conf_list, taxa_list
+    return pred_list, score_list, taxa_list
 

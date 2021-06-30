@@ -75,13 +75,13 @@ class SimpleModel(BaseModel):
         bb_array = np.concatenate(bb_list, axis=0)
 
         if bayesian:
-            pred_list, conf_list, taxa_list = get_tuple_list([predict_list[f][i][0]*bb_list[f][i][6]
+            pred_list, score_list, taxa_list = get_tuple_list([predict_list[f][i][0]*bb_list[f][i][6]
                                                  for f in range(len(predict_list)) for i in range(len(predict_list[f]))])
         else:
-            pred_list, conf_list, taxa_list = get_tuple_list([predict_list[f][i][0]
+            pred_list, score_list, taxa_list = get_tuple_list([predict_list[f][i][0]
                                                  for f in range(len(predict_list)) for i in range(len(predict_list[f]))])
 
-        all_array = np.concatenate([bb_array,np.array(pred_list)[:,None],np.array(conf_list)[:,None],np.array(taxa_list)[:,None]], axis=1)
+        all_array = np.concatenate([bb_array,np.array(pred_list)[:,None],np.array(score_list)[:,None],np.array(taxa_list)[:,None]], axis=1)
 
         if validate:
             return all_array, label_list
@@ -128,15 +128,15 @@ class SimpleModel(BaseModel):
         bb_array = np.concatenate(bb_list, axis=0)
 
         if bayesian:
-            pred_list, conf_list, taxa_list = get_tuple_list([predict_list[f][i]*bb_list[f][i][6]
+            pred_list, score_list, taxa_list = get_tuple_list([predict_list[f][i]*bb_list[f][i][6]
                                                  for f in range(len(predict_list)) for i in range(len(predict_list[f]))],
                                                  THRESH1,THRESH2,THRESH3)
         else:
-            pred_list, conf_list, taxa_list = get_tuple_list([predict_list[f][i]
+            pred_list, score_list, taxa_list = get_tuple_list([predict_list[f][i]
                                                  for f in range(len(predict_list)) for i in range(len(predict_list[f]))],
                                                  THRESH1,THRESH2,THRESH3)
 
-        all_array = np.concatenate([bb_array,np.array(pred_list)[:,None],np.array(conf_list)[:,None],np.array(taxa_list)[:,None]], axis=1)
+        all_array = np.concatenate([bb_array,np.array(pred_list)[:,None],np.array(score_list)[:,None],np.array(taxa_list)[:,None]], axis=1)
 
         if validate:
             return all_array, label_list

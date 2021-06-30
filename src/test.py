@@ -44,7 +44,7 @@ if len(df1) > 0:
                                              batch_size=CLASSIFIER_BATCH_SIZE,
                                              seed=7233422)
     model = Model(1e-07)
-#    index, bb_list, pred_list, conf_list, taxa_list, pred_bayes_list, conf_bayes_list, taxa_bayes_list = model.predict_taxa(df1, coor_generator)
+#    index, bb_list, pred_list, score_list, taxa_list, pred_bayes_list, score_bayes_list, taxa_bayes_list = model.predict_taxa(df1, coor_generator)
     index_list, all_array = model.predict_taxa(df1, coor_generator)
     print(all_array.shape)
 else:
