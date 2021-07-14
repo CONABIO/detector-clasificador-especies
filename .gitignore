@@ -1,1 +1,6 @@
 *.ipynb_checkpoints*
+*csv
+*pb
+*pkl
+*hdf5
+*__pycache__*

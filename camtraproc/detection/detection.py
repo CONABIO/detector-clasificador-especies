@@ -49,6 +49,13 @@ def get_dataframe(df,ind_bboxes):
     latlong = []
     index = []
     index_batch = []
+    date = []
+    frame_rate = [] 
+    item_type = []
+    date_delta = []
+    sequence_id = []
+    index1 = []
+    num_frame = []
 
     if type(df['item_file']) == str:
         for b in range(len(ind_bboxes)):
@@ -61,6 +68,16 @@ def get_dataframe(df,ind_bboxes):
                 file_names.append(df['item_file'].split('.')[0] + '_bb' + str(i) + '.' + df['item_file'].split('.')[1])
                 latlong.append(df['latlong'])
                 index.append(df['id'])
+                try:
+                    date.append(df['date'])
+                    frame_rate.append(df['frame_rate'])
+                    item_type.append(df['item_type'])
+                    index1.append(df['index1'])
+                    date_delta.append(df['date_delta'])
+                    sequence_id.append(df['sequence_id'])
+                    num_frame.append(df['num_frame'])
+                except:
+                    pass
                 index_batch.append(ind_bboxes[b][0])
     else:
         for b in range(len(ind_bboxes)):
@@ -73,6 +90,16 @@ def get_dataframe(df,ind_bboxes):
                 file_names.append(df['item_file'][ind_bboxes[b][0]].split('.')[0] + '_bb' + str(i) + '.' + df['item_file'][ind_bboxes[b][0]].split('.')[1])
                 latlong.append(df['latlong'][ind_bboxes[b][0]])
                 index.append(df['id'][ind_bboxes[b][0]])
+                try:
+                    date.append(df['date'])
+                    frame_rate.append(df['frame_rate'])
+                    item_type.append(df['item_type'])
+                    index1.append(df['index1'])
+                    date_delta.append(df['date_delta'])
+                    sequence_id.append(df['sequence_id'])
+                    num_frame.append(df['num_frame'])
+                except:
+                    pass
                 index_batch.append(ind_bboxes[b][0])
     ndf = pd.DataFrame(index, columns=['id'])
     ndf['item_file'] = file_names
@@ -83,6 +110,17 @@ def get_dataframe(df,ind_bboxes):
     ndf['h'] = h
     ndf['score'] = score
     ndf['latlong'] = latlong
+    try:
+        ndf['date'] = date
+        ndf['frame_rate'] = frame_rate
+        ndf['item_type'] = item_type
+        ndf['index1'] = index1
+        ndf['date_delta'] = date_delta
+        ndf['sequence_id'] = sequence_id
+        ndf['num_frame'] = num_frame
+    except:
+        pass
+
     return ndf
 
 def crop_generator(img,x,y,w,h):
@@ -213,17 +251,19 @@ def generate_detections(detection_graph,images,bboxes_dir,df):
 
     return species_df, humans_df, maybe_humans_df
 
-def get_frames(key,df,bucket):
+def get_frames(key,df,mode,bucket=None):
     def get_df(df,f):
         df1 = df.copy()
         df1['item_file'] = os.path.basename(df['item_file']).split('.')[0] + '_{}.JPG'.format(f)
+        df1['num_frame'] = f
         return df1
-    if bucket != 'irekua':
+    if mode == 's3':
         url = get_url_s3(bucket,key)
     else:
         url = df['item_file']
     cap = cv2.VideoCapture(url)
     frames = []
+    no_frames = []
     while True:
         status, frame = cap.read()
         if not status:
@@ -234,7 +274,7 @@ def get_frames(key,df,bucket):
     ndf = pd.concat([get_df(df,f) for f in range(len(frames))])
     return frames, ndf
 
-def get_images(dirpath,filepath,df):
+def get_images(filepath,df,dirpath=''):
 #    def get_df(df,f=0):
 #        df1 = df.copy()
 #        df1['item_file'] = df['item_file'].split('.')[0] + '_{}.'.format(f) + df['item_file'].split('.')[1]
@@ -242,6 +282,40 @@ def get_images(dirpath,filepath,df):
     try:
         img = PIL.Image.open(os.path.join(dirpath, filepath)).convert("RGB")
         img = [np.array(img)]
+        df1 = df.copy()
+        df1['num_frame'] = 0
         return img, df
     except Exception as e:
+        df1 = df.copy()
+        df1['num_frame'] = -1
         return False, df
+
+def run_megadetector(detection_graph4,bboxes_dir,df,media_type,mode,bucket=None):
+    species = []
+    humans = []
+    maybe_humans = []
+
+    if media_type == 'video':
+        for i in range(len(df)):
+            images,ndf = get_frames(df.iloc[i]['item_file'],df.iloc[i],mode,bucket)
+            print('video_{}/{}'.format(i,len(df)))
+            species_df, humans_df, maybe_humans_df = generate_detections(detection_graph4,images,bboxes_dir,ndf)
+            species.append(species_df)
+            humans.append(humans_df)
+            maybe_humans.append(maybe_humans_df)
+    elif media_type == 'image':
+        for i in range(len(df)):
+            images,ndf = get_images(df.iloc[i]['item_file'],df.iloc[i])
+            if images is not False:
+                species_df, humans_df, maybe_humans_df = generate_detections(detection_graph4,images,bboxes_dir,ndf)
+                species.append(species_df)
+                humans.append(humans_df)
+                maybe_humans.append(maybe_humans_df)
+    else:
+        raise Exception('media type is invalid!')
+        
+    dfspecies = pd.concat(species)
+    dfhumans = pd.concat(humans)
+    dfmaybe_humans = pd.concat(maybe_humans)
+    return [dfspecies,dfhumans,dfmaybe_humans]
+

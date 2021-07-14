@@ -1,5 +1,6 @@
 import pandas as pd
-from camtraproc.settings import AWS_SERVER_PUBLIC_KEY, AWS_SERVER_SECRET_KEY, ITEM_TYPE, ITEM_LIST_ENDPOINT, USER, PSSWD
+from datetime import datetime, timedelta
+from camtraproc.settings import AWS_SERVER_PUBLIC_KEY, AWS_SERVER_SECRET_KEY, ITEM_TYPE, ITEM_LIST_ENDPOINT, USER, PSSWD,WITH_MOTION_SEQ, SEQ_TIME_DELTA
 import boto3
 import json
 import requests
@@ -23,6 +24,19 @@ def upload_s3(bucket,path,out_path,region='us-west-2'):
         print(e)
         return False
     return True
+
+def get_sequence(delta):
+    res = []
+    td = timedelta(seconds=SEQ_TIME_DELTA) #20
+    g = 1
+    res.append(str(1))
+    for i in range(1, len(delta)):
+        if (delta[i] > td):
+            g = g + 1
+            res.append(str(g))
+        else:
+            res.append(str(g))
+    return res
 
 def query_s3(bucket,path,pattern,out_path,region='us-west-2'):
     s3 = boto3.resource('s3',region_name=region, aws_access_key_id=AWS_SERVER_PUBLIC_KEY,
@@ -68,5 +82,13 @@ def query_irekua(out_path):
     return df
 
 def query_manual(out_path):
-    return pd.read_csv(os.path.join(out_path,'total_files_coor.csv'))
-
+    if WITH_MOTION_SEQ:
+        df = pd.read_csv(os.path.join(out_path,'total_files_coor.csv')).sort_values(by='date') #id, item_file, date, latlong, frame_rate, item_type
+        df = df.reset_index(drop=True)
+        df['index1'] = df.index
+        df['date'] = df.apply(lambda x: datetime.strptime(x.date, '%Y-%m-%d %H:%M:%S'), axis=1)
+        df['date_delta'] = df['date'].diff()
+        df['sequence_id'] = get_sequence(df['date_delta'])
+        return df
+    else:
+        return pd.read_csv(os.path.join(out_path,'total_files_coor.csv')) #id, item_file, latlong
