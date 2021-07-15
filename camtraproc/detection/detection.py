@@ -66,16 +66,16 @@ def get_dataframe(df,ind_bboxes):
                 w.append(ind_bboxes[b][1][i,3]-ind_bboxes[b][1][i,1])
                 h.append(ind_bboxes[b][1][i,2]-ind_bboxes[b][1][i,0])
                 file_names.append(df['item_file'].split('.')[0] + '_bb' + str(i) + '.' + df['item_file'].split('.')[1])
-                latlong.append(df['latlong'])
-                index.append(df['id'])
+                latlong.append(df['latlong'])#[ind_bboxes[b][0]])
+                index.append(df['id'])#[ind_bboxes[b][0]])
                 try:
-                    date.append(df['date'])
-                    frame_rate.append(df['frame_rate'])
-                    item_type.append(df['item_type'])
-                    index1.append(df['index1'])
-                    date_delta.append(df['date_delta'])
-                    sequence_id.append(df['sequence_id'])
-                    num_frame.append(df['num_frame'])
+                    date.append(df['date'])#[ind_bboxes[b][0]])
+                    frame_rate.append(df['frame_rate'])#[ind_bboxes[b][0]])
+                    item_type.append(df['item_type'])#[ind_bboxes[b][0]])
+                    index1.append(df['index1'])#[ind_bboxes[b][0]])
+                    date_delta.append(df['date_delta'])#[ind_bboxes[b][0]])
+                    sequence_id.append(df['sequence_id'])#[ind_bboxes[b][0]])
+                    num_frame.append(df['num_frame'])#[ind_bboxes[b][0]])
                 except:
                     pass
                 index_batch.append(ind_bboxes[b][0])
@@ -91,13 +91,13 @@ def get_dataframe(df,ind_bboxes):
                 latlong.append(df['latlong'][ind_bboxes[b][0]])
                 index.append(df['id'][ind_bboxes[b][0]])
                 try:
-                    date.append(df['date'])
-                    frame_rate.append(df['frame_rate'])
-                    item_type.append(df['item_type'])
-                    index1.append(df['index1'])
-                    date_delta.append(df['date_delta'])
-                    sequence_id.append(df['sequence_id'])
-                    num_frame.append(df['num_frame'])
+                    date.append(df['date'][ind_bboxes[b][0]])
+                    frame_rate.append(df['frame_rate'][ind_bboxes[b][0]])
+                    item_type.append(df['item_type'][ind_bboxes[b][0]])
+                    index1.append(df['index1'][ind_bboxes[b][0]])
+                    date_delta.append(df['date_delta'][ind_bboxes[b][0]])
+                    sequence_id.append(df['sequence_id'][ind_bboxes[b][0]])
+                    num_frame.append(df['num_frame'][ind_bboxes[b][0]])
                 except:
                     pass
                 index_batch.append(ind_bboxes[b][0])
@@ -167,7 +167,7 @@ def crop_generator(img,x,y,w,h):
 
 
 
-def generate_detections(detection_graph,images,bboxes_dir,df):
+def generate_detections(detection_graph,bboxes_dir,df):
     """
     boxes,scores,classes,images = generate_detections(detection_graph,images)
 
@@ -189,8 +189,11 @@ def generate_detections(detection_graph,images,bboxes_dir,df):
     boxes = []
     scores = []
     classes = []
-
-    nImages = len(images)
+    
+    if type(df['frame_array']) == pd.core.series.Series:
+        nImages = len(df['frame_array'])
+    elif type(df['frame_array']) == list:
+        nImages = 1
     num = nImages // DETECTOR_BATCH_SIZE
     if nImages % DETECTOR_BATCH_SIZE:
         num = num + 1
@@ -204,13 +207,21 @@ def generate_detections(detection_graph,images,bboxes_dir,df):
 
             for inu in range(num):
 
-                print('Processing images {} of {}'.format(inu,num))
                 if nImages == 1:
-                    images_expanded = imageNP_expanded = np.expand_dims(images[0], axis=0)
+                    print('Processing images {} of {}'.format(inu+1,num))
+                    images = [df['frame_array']]
+                    assert images[0][0].shape[1] == df['width']
+                    images_expanded = imageNP_expanded = np.expand_dims(images[0][0], axis=0)
                 elif nImages % DETECTOR_BATCH_SIZE and inu == num - 1:
+                    print('Processing images batch {} of {}'.format(inu+1,num))
+                    images = list(df['frame_array'])
                     images_expanded = np.stack(images[inu*DETECTOR_BATCH_SIZE:], axis=0)
+                    images_expanded = np.squeeze(images_expanded, axis=1)
                 else:
+                    print('Processing images batch {} of {}'.format(inu+1,num))
+                    images = list(df['frame_array'])
                     images_expanded = np.stack(images[inu*DETECTOR_BATCH_SIZE:(inu+1)*DETECTOR_BATCH_SIZE], axis=0) #imageNP_expanded = np.expand_dims(imageNP, axis=0)
+                    images_expanded = np.squeeze(images_expanded, axis=1)
                 image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
                 box = detection_graph.get_tensor_by_name('detection_boxes:0')
                 score = detection_graph.get_tensor_by_name('detection_scores:0')
@@ -236,11 +247,11 @@ def generate_detections(detection_graph,images,bboxes_dir,df):
 
     species_df = get_dataframe(df,species)
     for r in np.array(species_df):
-        x = int(r[3]*images[r[2]].shape[1] + 0.5)
-        y = int(r[4]*images[r[2]].shape[0] + 0.5)
-        w = int(r[5]*images[r[2]].shape[1] + 0.5)
-        h = int(r[6]*images[r[2]].shape[0] + 0.5)
-        image_to_write = cv2.cvtColor(crop_generator(images[r[2]],x,y,w,h), cv2.COLOR_RGB2BGR)
+        x = int(r[3]*images[r[2]][0].shape[1] + 0.5)
+        y = int(r[4]*images[r[2]][0].shape[0] + 0.5)
+        w = int(r[5]*images[r[2]][0].shape[1] + 0.5)
+        h = int(r[6]*images[r[2]][0].shape[0] + 0.5)
+        image_to_write = cv2.cvtColor(crop_generator(images[r[2]][0],x,y,w,h), cv2.COLOR_RGB2BGR)
         os.makedirs(os.path.dirname(os.path.join(bboxes_dir, r[1])), exist_ok=True)
         cv2.imwrite(os.path.join(bboxes_dir, r[1]), image_to_write)
 
@@ -252,10 +263,11 @@ def generate_detections(detection_graph,images,bboxes_dir,df):
     return species_df, humans_df, maybe_humans_df
 
 def get_frames(key,df,mode,bucket=None):
-    def get_df(df,f):
+    def get_df(df,i,f):
         df1 = df.copy()
-        df1['item_file'] = os.path.basename(df['item_file']).split('.')[0] + '_{}.JPG'.format(f)
-        df1['num_frame'] = f
+        df1['item_file'] = str(df['id']) + '_' + os.path.basename(df['item_file']).split('.')[0] + '_{}.JPG'.format(i)
+        df1['num_frame'] = i
+        df1['frame_array'] = f
         return df1
     if mode == 's3':
         url = get_url_s3(bucket,key)
@@ -268,11 +280,14 @@ def get_frames(key,df,mode,bucket=None):
         status, frame = cap.read()
         if not status:
             break
-        frames.append(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        frames.append([cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)])
     cap.release()
     nframes = len(frames)
-    ndf = pd.concat([get_df(df,f) for f in range(len(frames))])
-    return frames, ndf
+    if nframes > 0:
+        ndf = pd.concat([get_df(df,i,f) for i,f in enumerate(frames)])
+    else:
+        ndf = None
+    return ndf
 
 def get_images(filepath,df,dirpath=''):
 #    def get_df(df,f=0):
@@ -281,14 +296,19 @@ def get_images(filepath,df,dirpath=''):
 #        return df1
     try:
         img = PIL.Image.open(os.path.join(dirpath, filepath)).convert("RGB")
-        img = [np.array(img)]
+        width = np.array(img).shape[1]
+        height = np.array(img).shape[0]
+        img = np.array(img)
         df1 = df.copy()
+        df1['item_file'] = str(df['id']) + '_' + os.path.basename(df['item_file']).split('.')[0] + '_0.JPG'
         df1['num_frame'] = 0
-        return img, df
+        df1['frame_array'] = [img]
+        df1['width'] = width
+        df1['height'] = height
+        return pd.DataFrame(df1).transpose()
     except Exception as e:
-        df1 = df.copy()
-        df1['num_frame'] = -1
-        return False, df
+        print(e)
+        return None
 
 def run_megadetector(detection_graph4,bboxes_dir,df,media_type,mode,bucket=None):
     species = []
@@ -296,26 +316,54 @@ def run_megadetector(detection_graph4,bboxes_dir,df,media_type,mode,bucket=None)
     maybe_humans = []
 
     if media_type == 'video':
+        print('VIDEOS PROCESSING...')
         for i in range(len(df)):
-            images,ndf = get_frames(df.iloc[i]['item_file'],df.iloc[i],mode,bucket)
-            print('video_{}/{}'.format(i,len(df)))
-            species_df, humans_df, maybe_humans_df = generate_detections(detection_graph4,images,bboxes_dir,ndf)
-            species.append(species_df)
-            humans.append(humans_df)
-            maybe_humans.append(maybe_humans_df)
-    elif media_type == 'image':
-        for i in range(len(df)):
-            images,ndf = get_images(df.iloc[i]['item_file'],df.iloc[i])
-            if images is not False:
-                species_df, humans_df, maybe_humans_df = generate_detections(detection_graph4,images,bboxes_dir,ndf)
+            ndf = get_frames(df.iloc[i]['item_file'],df.iloc[i],mode,bucket)
+            if ndf is not None:
+                print('video_{}/{}'.format(i+1,len(df)))
+                species_df, humans_df, maybe_humans_df = generate_detections(detection_graph4,bboxes_dir,ndf)
                 species.append(species_df)
                 humans.append(humans_df)
                 maybe_humans.append(maybe_humans_df)
+            else:
+                species.append(None)
+                humans.append(None)
+                maybe_humans.append(None)
+    elif media_type == 'image':
+        print('IMAGES PROCESSING...')
+        ndfl = []
+        for i in range(len(df)):
+            ndfl.append(get_images(df.iloc[i]['item_file'],df.iloc[i]))
+#        try:
+        ndf = pd.concat(ndfl)
+        dfl = [pd.DataFrame(y) for x, y in ndf.groupby(by=['width','height'], as_index=False)]
+        for ii,dff in enumerate(dfl):
+                df1 = pd.concat([dff.iloc[ind] for ind in range(len(dff))])
+                print('images_batch_{}/{}'.format(ii+1,len(dfl)))
+                species_df, humans_df, maybe_humans_df = generate_detections(detection_graph4,bboxes_dir,df1)
+                species.append(species_df)
+                humans.append(humans_df)
+                maybe_humans.append(maybe_humans_df)
+#        except Exception as e:
+#            print(e)
+#            species.append(None)
+#            humans.append(None)
+#            maybe_humans.append(None)
+            
     else:
         raise Exception('media type is invalid!')
         
-    dfspecies = pd.concat(species)
-    dfhumans = pd.concat(humans)
-    dfmaybe_humans = pd.concat(maybe_humans)
+    try:
+        dfspecies = pd.concat(species)
+    except Exception as e:
+        dfspecies = None
+    try:
+        dfhumans = pd.concat(humans)
+    except Exception as e:
+        dfhumans = None        
+    try:
+        dfmaybe_humans = pd.concat(maybe_humans)
+    except Exception as e:
+        dfmaybe_humans = None
     return [dfspecies,dfhumans,dfmaybe_humans]
 

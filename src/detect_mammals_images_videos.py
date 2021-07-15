@@ -39,9 +39,12 @@ results_list = [run_megadetector(detection_graph4,bboxes_dir,df,'image',MODE) if
 if None in results_list:
     raise ValueError('invalid item_type!')
 
-dfspecies = pd.concat([dflist[0] for dflist in results_list])
-dfhumans = pd.concat([dflist[1] for dflist in results_list])
-dfmaybe_humans = pd.concat([dflist[2] for dflist in results_list])
+try:
+    dfspecies = pd.concat([dflist[0] for dflist in results_list])
+    dfhumans = pd.concat([dflist[1] for dflist in results_list])
+    dfmaybe_humans = pd.concat([dflist[2] for dflist in results_list])
+except Exception as e:
+    print('media invalid in {}!'.format(csv_file))
 
 if len(dfspecies) > 0:
     dfspecies.to_csv(os.path.join(csv_dir,'{}_species.csv'.format(num_str)), index=False )
