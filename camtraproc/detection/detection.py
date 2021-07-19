@@ -39,7 +39,7 @@ def get_species_and_humans_indexes(detection_classes,scores,boxes,threshold):
                 for f in range(len(scores)) if (detection_classes[f][scores[f] >= threshold] == 1).any() and f not in humans]
     return species, humans, maybe_humans
 
-def get_dataframe(df,ind_bboxes):
+def get_dataframe(df,ind_bboxes,include_frame_array):
     score = []
     x = []
     y = []
@@ -56,6 +56,7 @@ def get_dataframe(df,ind_bboxes):
     sequence_id = []
     index1 = []
     num_frame = []
+    frame_array = []
 
     if type(df['item_file']) == str:
         for b in range(len(ind_bboxes)):
@@ -76,6 +77,8 @@ def get_dataframe(df,ind_bboxes):
                     date_delta.append(df['date_delta'])#[ind_bboxes[b][0]])
                     sequence_id.append(df['sequence_id'])#[ind_bboxes[b][0]])
                     num_frame.append(df['num_frame'])#[ind_bboxes[b][0]])
+                    if include_frame_array:
+                        frame_array.append(df['frame_array'])#[ind_bboxes[b][0]])
                 except:
                     pass
                 index_batch.append(ind_bboxes[b][0])
@@ -98,6 +101,8 @@ def get_dataframe(df,ind_bboxes):
                     date_delta.append(df['date_delta'][ind_bboxes[b][0]])
                     sequence_id.append(df['sequence_id'][ind_bboxes[b][0]])
                     num_frame.append(df['num_frame'][ind_bboxes[b][0]])
+                    if include_frame_array:
+                        frame_array.append(df['frame_array'][ind_bboxes[b][0]])
                 except:
                     pass
                 index_batch.append(ind_bboxes[b][0])
@@ -118,6 +123,8 @@ def get_dataframe(df,ind_bboxes):
         ndf['date_delta'] = date_delta
         ndf['sequence_id'] = sequence_id
         ndf['num_frame'] = num_frame
+        if include_frame_array:
+            ndf['frame_array'] = frame_array
     except:
         pass
 
@@ -245,7 +252,7 @@ def generate_detections(detection_graph,bboxes_dir,df):
 
     species, humans, maybe_humans = get_species_and_humans_indexes(classes,scores,boxes,DETECTOR_THRESHOLD)
 
-    species_df = get_dataframe(df,species)
+    species_df = get_dataframe(df,species,True)
     for r in np.array(species_df):
         x = int(r[3]*images[r[2]][0].shape[1] + 0.5)
         y = int(r[4]*images[r[2]][0].shape[0] + 0.5)
@@ -257,8 +264,8 @@ def generate_detections(detection_graph,bboxes_dir,df):
 
 #    humans_df = df[df['ind'].isin(humans)]
 #    maybe_humans_df = df[df['ind'].isin(maybe_humans)]
-    humans_df = get_dataframe(df,humans)
-    maybe_humans_df = get_dataframe(df,maybe_humans)
+    humans_df = get_dataframe(df,humans,False)
+    maybe_humans_df = get_dataframe(df,maybe_humans,False)
 
     return species_df, humans_df, maybe_humans_df
 

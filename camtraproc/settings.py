@@ -43,3 +43,9 @@ WITH_MOTION_SEQ=bool(os.getenv('WITH_MOTION_SEQ'))
 IMAGE_TYPE=int(os.getenv('IMAGE_TYPE'))
 VIDEO_TYPE=int(os.getenv('VIDEO_TYPE'))
 SEQ_TIME_DELTA=int(os.getenv('SEQ_TIME_DELTA'))
+SUBMETHOD=os.getenv('SUBMETHOD') #MOG or Acc
+ACCAVG=float(os.getenv('ACCAVG')) #accAvg = 0.35
+THRESHT=int(os.getenv('THRESHT'))#threshT = 30
+MOGVAR=int(os.getenv('MOGVAR'))#mogvariance = 25
+MOGLEARNING=float(os.getenv('MOGLEARNING'))#moglearning = 0.09 
+MINSIZE=int(os.getenv('MINSIZE'))#200 -> 1/200^2

@@ -15,6 +15,7 @@ detector_file.pb
     detector_file
 """
 from camtraproc.detection.detection import run_megadetector, load_model
+from camtraproc.detection.motionm import run_motionmeerkat
 from camtraproc.settings import IMAGE_TYPE, VIDEO_TYPE, MODE
 import pandas as pd
 import os
@@ -45,9 +46,19 @@ try:
     dfmaybe_humans = pd.concat([dflist[2] for dflist in results_list])
 except Exception as e:
     print('media invalid in {}!'.format(csv_file))
+    
+dfl = []
+results_list = []
+dfl = [pd.DataFrame(y).sort_values(by=['index1','num_frame']).reset_index(drop=True) for x, y in dfspecies.groupby(by=['sequence_id'], as_index=False)]
+
+results_list = [run_motionmeerkat(df) for df in dfl]
+
+dfspeciesmm = pd.concat(results_list)
 
 if len(dfspecies) > 0:
-    dfspecies.to_csv(os.path.join(csv_dir,'{}_species.csv'.format(num_str)), index=False )
+    dfspecies.drop(['frame_array'],axis=1).to_csv(os.path.join(csv_dir,'{}_species.csv'.format(num_str)), index=False )
+if len(dfspeciesmm) > 0:
+    dfspeciesmm.to_csv(os.path.join(csv_dir,'{}_species_after_motionm.csv'.format(num_str)), index=False )
 if len(dfhumans) > 0:
     dfhumans.to_csv(os.path.join(csv_dir,'{}_humans.csv'.format(num_str)), index=False )
 if len(dfmaybe_humans) > 0:
