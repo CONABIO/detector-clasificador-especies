@@ -182,6 +182,8 @@ def get_roi(image,x,y,w,h,width,height):
 def run_motionmeerkat(df):
     if type(df['frame_array']) == pd.core.series.Series:
         nFrames = len(df['frame_array'])
+        nvFrames = len(df[df['item_type'] == VIDEO_TYPE])
+        
         id_list = df['id'].drop_duplicates().to_list()
         media_xs = [df[df['id'] == ind]['frame_array'].iloc[0][0].shape[1] for ind in id_list]
         media_ys = [df[df['id'] == ind]['frame_array'].iloc[0][0].shape[0] for ind in id_list]
@@ -199,34 +201,41 @@ def run_motionmeerkat(df):
                     if df['id'].iloc[ix] != min_ind else
                   df['frame_array'].iloc[ix][0]
                   for ix in range(nFrames)]
-        
-        video_ind_list = [ix 
-                  for ix in range(nFrames) if df['item_type'].iloc[ix] == VIDEO_TYPE]
-        if len(video_ind_list) > 0:
-            first_img_ind = video_ind_list[0]
-        else:
-            first_img_ind = 0
 
+        
         x = y = 0.0 #complete image
         w = h = 1.0 #complete image
         width0 = frames[0].shape[1]
         height0 = frames[0].shape[0]
-        first_image = get_roi(frames[first_img_ind],x,y,w,h,width0,height0)
-        width = first_image.shape[1]
-        height = first_image.shape[0]
-
-        bgs = Background(SUBMETHOD,first_image,ACCAVG,THRESHT,MOGVAR)
-        _=bgs.BackGroundSub(first_image,MOGLEARNING) 
-
+        first_shape = get_roi(frames[0],x,y,w,h,width0,height0).shape
+        width = first_shape[1]
+        height = first_shape[0]
+        
+        df['frame_array_resized'] = frames
         minSIZE = float((height0/MINSIZE)*(width0/MINSIZE))/float(height*width) # tamaño minimo de especie de interes
         noMotion=False
-        
         motion = []
+        frames = []
+        if SUBMETHOD == 'MOG':
+            frames = df[df['item_type'] == VIDEO_TYPE]['frame_array_resized'].to_list()
+            bgs = Background(SUBMETHOD,frames[0],ACCAVG,THRESHT,MOGVAR)
+            if len(frames) > 200:
+                for image in frames[:200]:
+                    _=bgs.BackGroundSub(image,MOGLEARNING)
+            else:
+                for image in frames:
+                    _=bgs.BackGroundSub(image,MOGLEARNING)
 
-        for i in range(len(frames)):
+        elif SUBMETHOD == 'Acc':
+            first_image = np.median(np.stack(frames, axis=0),axis=0).astype(int)
+            bgs = Background(SUBMETHOD,first_image,ACCAVG,THRESHT,MOGVAR)
+        else:
+            raise ValueError('Submethod is invalid!')
+        
+
+        for i in range(len(df['frame_array_resized'])):
             if i % 1 == 0:
-                image = get_roi(frames[i],x,y,w,h,width0,height0)
- 
+                image = get_roi(df['frame_array_resized'].iloc[i],x,y,w,h,width0,height0)
                 grey_image=bgs.BackGroundSub(image,MOGLEARNING)
     
                 noMotion = is_small(grey_image,width,height,minSIZE,noMotion)
@@ -238,6 +247,6 @@ def run_motionmeerkat(df):
         df['is_fauna'] = True
         
     df = df[df['is_fauna'] == True]
-    df = df.drop(['frame_array','is_fauna'], axis=1)
+    df = df.drop(['frame_array','is_fauna','frame_array_resized'], axis=1)
 
     return df

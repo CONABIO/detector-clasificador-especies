@@ -44,19 +44,25 @@ try:
     dfspecies = pd.concat([dflist[0] for dflist in results_list])
     dfhumans = pd.concat([dflist[1] for dflist in results_list])
     dfmaybe_humans = pd.concat([dflist[2] for dflist in results_list])
+    
+    dfhumans = dfhumans[dfhumans['detected'] == True]
+    dfmaybe_humans = dfmaybe_humans[dfmaybe_humans['detected'] == True]
 except Exception as e:
     print('media invalid in {}!'.format(csv_file))
-    
+
+dft = dfspecies.copy()    
+dfspecies = dfspecies[dfspecies['detected'] == True].drop(['frame_array'],axis=1)
+
 dfl = []
 results_list = []
-dfl = [pd.DataFrame(y).sort_values(by=['index1','num_frame']).reset_index(drop=True) for x, y in dfspecies.groupby(by=['sequence_id'], as_index=False)]
+dfl = [pd.DataFrame(y).sort_values(by=['index1','num_frame']).reset_index(drop=True) for x, y in dft.groupby(by=['sequence_id'], as_index=False)]
 
 results_list = [run_motionmeerkat(df) for df in dfl]
 
 dfspeciesmm = pd.concat(results_list)
 
 if len(dfspecies) > 0:
-    dfspecies.drop(['frame_array'],axis=1).to_csv(os.path.join(csv_dir,'{}_species.csv'.format(num_str)), index=False )
+    dfspecies.to_csv(os.path.join(csv_dir,'{}_species.csv'.format(num_str)), index=False )
 if len(dfspeciesmm) > 0:
     dfspeciesmm.to_csv(os.path.join(csv_dir,'{}_species_after_motionm.csv'.format(num_str)), index=False )
 if len(dfhumans) > 0:

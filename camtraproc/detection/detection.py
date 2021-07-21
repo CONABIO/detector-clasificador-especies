@@ -57,6 +57,9 @@ def get_dataframe(df,ind_bboxes,include_frame_array):
     index1 = []
     num_frame = []
     frame_array = []
+    detected = []
+    
+    ibxl = [ibbx[0] for ibbx in ind_bboxes]
 
     if type(df['item_file']) == str:
         for b in range(len(ind_bboxes)):
@@ -82,30 +85,60 @@ def get_dataframe(df,ind_bboxes,include_frame_array):
                 except:
                     pass
                 index_batch.append(ind_bboxes[b][0])
+                detected.append(True)
     else:
-        for b in range(len(ind_bboxes)):
-            for i in range(ind_bboxes[b][1].shape[0]):
-                score.append(ind_bboxes[b][2][0])
-                x.append(ind_bboxes[b][1][i,1])
-                y.append(ind_bboxes[b][1][i,0])
-                w.append(ind_bboxes[b][1][i,3]-ind_bboxes[b][1][i,1])
-                h.append(ind_bboxes[b][1][i,2]-ind_bboxes[b][1][i,0])
-                file_names.append(df['item_file'][ind_bboxes[b][0]].split('.')[0] + '_bb' + str(i) + '.' + df['item_file'][ind_bboxes[b][0]].split('.')[1])
-                latlong.append(df['latlong'][ind_bboxes[b][0]])
-                index.append(df['id'][ind_bboxes[b][0]])
+        for ind in range(len(df['id'])):
+            if ind in ibxl:
+                ibx = np.nonzero(np.array(ibxl) == ind)[0][0]
+#            for b in range(len(ind_bboxes)):
+                for i in range(ind_bboxes[ibx][1].shape[0]):
+                    score.append(ind_bboxes[ibx][2][0])
+                    x.append(ind_bboxes[ibx][1][i,1])
+                    y.append(ind_bboxes[ibx][1][i,0])
+                    w.append(ind_bboxes[ibx][1][i,3]-ind_bboxes[ibx][1][i,1])
+                    h.append(ind_bboxes[ibx][1][i,2]-ind_bboxes[ibx][1][i,0])
+                    file_names.append(df['item_file'][ind_bboxes[ibx][0]].split('.')[0] + '_bb' + str(i) + '.' + df['item_file'][ind_bboxes[ibx][0]].split('.')[1])
+                    latlong.append(df['latlong'][ind_bboxes[ibx][0]])
+                    index.append(df['id'][ind_bboxes[ibx][0]])
+                    try:
+                        date.append(df['date'][ind_bboxes[ibx][0]])
+                        frame_rate.append(df['frame_rate'][ind_bboxes[ibx][0]])
+                        item_type.append(df['item_type'][ind_bboxes[ibx][0]])
+                        index1.append(df['index1'][ind_bboxes[ibx][0]])
+                        date_delta.append(df['date_delta'][ind_bboxes[ibx][0]])
+                        sequence_id.append(df['sequence_id'][ind_bboxes[ibx][0]])
+                        num_frame.append(df['num_frame'][ind_bboxes[ibx][0]])
+                        if include_frame_array:
+                            frame_array.append(df['frame_array'][ind_bboxes[ibx][0]])
+                    except:
+                        pass
+                    index_batch.append(ind_bboxes[ibx][0])
+                    detected.append(True)
+            else:
+                score.append(None)
+                x.append(None)
+                y.append(None)
+                w.append(None)
+                h.append(None)
+                file_names.append(df['item_file'][ind])
+                latlong.append(df['latlong'][ind])
+                index.append(df['id'][ind])
                 try:
-                    date.append(df['date'][ind_bboxes[b][0]])
-                    frame_rate.append(df['frame_rate'][ind_bboxes[b][0]])
-                    item_type.append(df['item_type'][ind_bboxes[b][0]])
-                    index1.append(df['index1'][ind_bboxes[b][0]])
-                    date_delta.append(df['date_delta'][ind_bboxes[b][0]])
-                    sequence_id.append(df['sequence_id'][ind_bboxes[b][0]])
-                    num_frame.append(df['num_frame'][ind_bboxes[b][0]])
+                    date.append(df['date'][ind])
+                    frame_rate.append(df['frame_rate'][ind])
+                    item_type.append(df['item_type'][ind])
+                    index1.append(df['index1'][ind])
+                    date_delta.append(df['date_delta'][ind])
+                    sequence_id.append(df['sequence_id'][ind])
+                    num_frame.append(df['num_frame'][ind])
                     if include_frame_array:
-                        frame_array.append(df['frame_array'][ind_bboxes[b][0]])
+                        frame_array.append(df['frame_array'][ind])
                 except:
                     pass
-                index_batch.append(ind_bboxes[b][0])
+                index_batch.append(ind)
+                detected.append(False)
+
+                
     ndf = pd.DataFrame(index, columns=['id'])
     ndf['item_file'] = file_names
     ndf['index_batch'] = index_batch
@@ -125,6 +158,7 @@ def get_dataframe(df,ind_bboxes,include_frame_array):
         ndf['num_frame'] = num_frame
         if include_frame_array:
             ndf['frame_array'] = frame_array
+        ndf['detected'] = detected
     except:
         pass
 
@@ -253,14 +287,22 @@ def generate_detections(detection_graph,bboxes_dir,df):
     species, humans, maybe_humans = get_species_and_humans_indexes(classes,scores,boxes,DETECTOR_THRESHOLD)
 
     species_df = get_dataframe(df,species,True)
-    for r in np.array(species_df):
-        x = int(r[3]*images[r[2]][0].shape[1] + 0.5)
-        y = int(r[4]*images[r[2]][0].shape[0] + 0.5)
-        w = int(r[5]*images[r[2]][0].shape[1] + 0.5)
-        h = int(r[6]*images[r[2]][0].shape[0] + 0.5)
-        image_to_write = cv2.cvtColor(crop_generator(images[r[2]][0],x,y,w,h), cv2.COLOR_RGB2BGR)
-        os.makedirs(os.path.dirname(os.path.join(bboxes_dir, r[1])), exist_ok=True)
-        cv2.imwrite(os.path.join(bboxes_dir, r[1]), image_to_write)
+
+    species_array = np.array(species_df)
+    for i in range(species_array.shape[0]):
+        try:
+            x = int(species_array[i][3]*images[species_array[i][2]][0].shape[1] + 0.5)
+            y = int(species_array[i][4]*images[species_array[i][2]][0].shape[0] + 0.5)
+            w = int(species_array[i][5]*images[species_array[i][2]][0].shape[1] + 0.5)
+            h = int(species_array[i][6]*images[species_array[i][2]][0].shape[0] + 0.5)
+            image_to_write = cv2.cvtColor(crop_generator(images[species_array[i][2]][0],x,y,w,h), cv2.COLOR_RGB2BGR)
+#            os.makedirs(os.path.dirname(os.path.join(bboxes_dir, r[1])), exist_ok=True)
+#            cv2.imwrite(os.path.join(bboxes_dir, r[1]), image_to_write)
+        except Exception as e:
+#            pass
+            image_to_write = images[species_array[i][2]][0] #needed index2 from batch
+        os.makedirs(os.path.dirname(os.path.join(bboxes_dir, species_array[i][1])), exist_ok=True)
+        cv2.imwrite(os.path.join(bboxes_dir, species_array[i][1]), image_to_write)
 
 #    humans_df = df[df['ind'].isin(humans)]
 #    maybe_humans_df = df[df['ind'].isin(maybe_humans)]
