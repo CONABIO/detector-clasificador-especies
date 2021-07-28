@@ -15,7 +15,7 @@ detector_file.pb
     detector_file
 """
 from camtraproc.detection.detection import run_megadetector, load_model
-from camtraproc.detection.motionm import run_motionmeerkat
+from camtraproc.detection.motionm_complete_image import run_motionmeerkat
 from camtraproc.settings import IMAGE_TYPE, VIDEO_TYPE, MODE
 import pandas as pd
 import os

@@ -196,7 +196,7 @@ def run_motionmeerkat(df):
                 min_ind = id_list[min_y]
         else:
             min_ind = id_list[min_x]
-        dim = df[df['id'] == min_ind]['frame_array'].iloc[0][0].shape[:2]
+        dim = df[df['id'] == min_ind]['frame_array'].iloc[0][0].shape[1::-1]
         frames = [cv2.resize(df['frame_array'].iloc[ix][0], dim, interpolation = cv2.INTER_AREA) 
                     if df['id'].iloc[ix] != min_ind else
                   df['frame_array'].iloc[ix][0]
@@ -247,6 +247,7 @@ def run_motionmeerkat(df):
         df['is_fauna'] = True
         
     df = df[df['is_fauna'] == True]
-    df = df.drop(['frame_array','is_fauna','frame_array_resized'], axis=1)
+    df = df[df['detected'] == True]
+    df = df.drop(['frame_array','is_fauna','frame_array_resized','detected'], axis=1)
 
     return df
