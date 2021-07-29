@@ -2,18 +2,18 @@
 
 ## Detection with Megadetector and postprocessing with MotionMeerkat
 
-Detects fauna and humans in images and video frames with [Megadetector](https://github.com/microsoft/CameraTraps/blob/master/megadetector.md). After that we postprocess the results with an algorithm derived from [MotionMeerkat](https://github.com/bw4sz/OpenCV_HummingbirdsMotion). We group images and videos taken maximum SEQ_TIME_DELTA seconds apart into sequences and use video frames to learn the background of the scene in order to detect motion in images and video frames of the same sequence. This procedure can be done using both MotionMeerkat methods (MOG and Acc) and also in two different forms: using the whole images and frames or a roi. 
+Detects fauna and humans in images and video frames with [Megadetector](https://github.com/microsoft/CameraTraps/blob/master/megadetector.md). After that we postprocess the results with an algorithm derived from [MotionMeerkat](https://github.com/bw4sz/OpenCV_HummingbirdsMotion). We group images and videos taken maximum SEQ_TIME_DELTA seconds apart into sequences and use video frames to learn the background of the scene in order to detect motion in images and video frames of the same sequence. This procedure can be done using both MotionMeerkat methods (MOG and Acc) and also in two different forms: using the whole images and frames or a roi.  
 
-In case of roi method, we considered that images with bounding boxes greater than 0.15x0.15 (relative size) and with scores greater than 0.985 have fauna, no matter that no motion was detected. This values can be changed [here](https://github.com/CONABIO/detector-clasificador-especies/blob/MotionMeerkat_postproc/camtraproc/detection/motionm_bbox.py#L175)
+In case of roi method, we considered that images with bounding boxes greater than 0.15x0.15 (relative size) and with scores greater than 0.985 have fauna, no matter that no motion was detected. This values can be changed [here](https://github.com/CONABIO/detector-clasificador-especies/blob/MotionMeerkat_postproc/camtraproc/detection/motionm_bbox.py#L175)  
 
-The results are stored in four different csv files:
+The results are stored in four different csv files:  
 
-#_species.csv: Contains Megadetector bounding boxes where fauna is located above a specific threshold
-#_humans.csv: Contains Megadetector bounding boxes where humans are located above a specific threshold
-#_maybe_humans.csv: Contains Megadetector bounding boxes where humans are located below #_humans.csv threshold and above 0.2
-#_species_after_motionm.csv: Contains results after motion detection
+#_species.csv: Contains Megadetector bounding boxes where fauna is located above a specific threshold  
+#_humans.csv: Contains Megadetector bounding boxes where humans are located above a specific threshold  
+#_maybe_humans.csv: Contains Megadetector bounding boxes where humans are located below #_humans.csv threshold and above 0.2  
+#_species_after_motionm.csv: Contains results after motion detection  
 
-After postprocessing, #_species_after_motionm.csv is written into irekua as predictions and the csv is deleted. In order to skip this step, delete `./src/post_predictions.py` [here](https://github.com/CONABIO/detector-clasificador-especies/blob/MotionMeerkat_postproc/detect_images_videos_motion_bbox.sh#L11) or [here](https://github.com/CONABIO/detector-clasificador-especies/blob/MotionMeerkat_postproc/detect_images_videos_motion_all_image.sh#L11).
+After postprocessing, #_species_after_motionm.csv is written into irekua as predictions and the csv is deleted. In order to skip this step, delete `./src/post_predictions.py` [here](https://github.com/CONABIO/detector-clasificador-especies/blob/MotionMeerkat_postproc/detect_images_videos_motion_bbox.sh#L11) or [here](https://github.com/CONABIO/detector-clasificador-especies/blob/MotionMeerkat_postproc/detect_images_videos_motion_all_image.sh#L11).  
 
 ## Deployment
 
@@ -72,11 +72,14 @@ LABEL=2 # any other label id to add in irekua i.e. Animalia
 
 ### 2. Choose postprocessing method (whole image or roi)
 
-- for whole image:
+- for whole image:  
+```
 ./detect_images_videos_motion_all_image.sh
-
+```
 - for roi:
+```
 ./detect_images_videos_motion_bbox.sh
+```
 
-inside those bash scripts specify the number of process you will execute (one of the NUM_PROCESSES) in line 4.
+Inside those bash scripts specify the number of process you will execute (one of the NUM_PROCESSES) in line 4.  
 
