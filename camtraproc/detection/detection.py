@@ -4,6 +4,8 @@ import numpy as np
 from camtraproc.settings import DETECTOR_BATCH_SIZE, DETECTOR_THRESHOLD
 from camtraproc.utils.utils import get_url_s3
 import PIL.Image
+import requests
+from io import BytesIO
 import cv2
 import os
 
@@ -50,7 +52,7 @@ def get_dataframe(df,ind_bboxes,include_frame_array):
     index = []
     index_batch = []
     date = []
-    frame_rate = [] 
+#    frame_rate = [] 
     item_type = []
     date_delta = []
     sequence_id = []
@@ -74,7 +76,7 @@ def get_dataframe(df,ind_bboxes,include_frame_array):
                 index.append(df['id'])#[ind_bboxes[b][0]])
                 try:
                     date.append(df['date'])#[ind_bboxes[b][0]])
-                    frame_rate.append(df['frame_rate'])#[ind_bboxes[b][0]])
+#                    frame_rate.append(df['frame_rate'])#[ind_bboxes[b][0]])
                     item_type.append(df['item_type'])#[ind_bboxes[b][0]])
                     index1.append(df['index1'])#[ind_bboxes[b][0]])
                     date_delta.append(df['date_delta'])#[ind_bboxes[b][0]])
@@ -102,7 +104,7 @@ def get_dataframe(df,ind_bboxes,include_frame_array):
                     index.append(df['id'][ind_bboxes[ibx][0]])
                     try:
                         date.append(df['date'][ind_bboxes[ibx][0]])
-                        frame_rate.append(df['frame_rate'][ind_bboxes[ibx][0]])
+#                        frame_rate.append(df['frame_rate'][ind_bboxes[ibx][0]])
                         item_type.append(df['item_type'][ind_bboxes[ibx][0]])
                         index1.append(df['index1'][ind_bboxes[ibx][0]])
                         date_delta.append(df['date_delta'][ind_bboxes[ibx][0]])
@@ -125,7 +127,7 @@ def get_dataframe(df,ind_bboxes,include_frame_array):
                 index.append(df['id'][ind])
                 try:
                     date.append(df['date'][ind])
-                    frame_rate.append(df['frame_rate'][ind])
+#                    frame_rate.append(df['frame_rate'][ind])
                     item_type.append(df['item_type'][ind])
                     index1.append(df['index1'][ind])
                     date_delta.append(df['date_delta'][ind])
@@ -150,7 +152,7 @@ def get_dataframe(df,ind_bboxes,include_frame_array):
     ndf['latlong'] = latlong
     try:
         ndf['date'] = date
-        ndf['frame_rate'] = frame_rate
+#        ndf['frame_rate'] = frame_rate
         ndf['item_type'] = item_type
         ndf['index1'] = index1
         ndf['date_delta'] = date_delta
@@ -344,7 +346,11 @@ def get_images(filepath,df,dirpath=''):
 #        df1['item_file'] = df['item_file'].split('.')[0] + '_{}.'.format(f) + df['item_file'].split('.')[1]
 #        return df1
     try:
-        img = PIL.Image.open(os.path.join(dirpath, filepath)).convert("RGB")
+        if 'http' in filepath:
+            response = requests.get(filepath)
+            img = PIL.Image.open(BytesIO(response.content)).convert("RGB")
+        else:
+            img = PIL.Image.open(os.path.join(dirpath, filepath)).convert("RGB")
         width = np.array(img).shape[1]
         height = np.array(img).shape[0]
         img = np.array(img)

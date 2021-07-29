@@ -297,17 +297,22 @@ def run_motionmeerkat(df):
         dfvid = dfv[dfv['detected'] == True]['id'].drop_duplicates().to_list()
         
         dff_list = []
-        for i in range(len(dfi)):
-            x = dfi.iloc[i].x
-            y = dfi.iloc[i].y
-            w = dfi.iloc[i].w
-            h = dfi.iloc[i].h
-            dft = pd.DataFrame(dfi.iloc[[i]]).copy()
-            dft['xc'] = x
-            dft['yc'] = y
-            dft['wc'] = w
-            dft['hc'] = h
-            dff_list.append(get_is_fauna(dft,'image',dfv))
+        is_video = True
+        if len(dfv) > 0:
+            for i in range(len(dfi)):
+                x = dfi.iloc[i].x
+                y = dfi.iloc[i].y
+                w = dfi.iloc[i].w
+                h = dfi.iloc[i].h
+                dft = pd.DataFrame(dfi.iloc[[i]]).copy()
+                dft['xc'] = x
+                dft['yc'] = y
+                dft['wc'] = w
+                dft['hc'] = h
+                dff_list.append(get_is_fauna(dft,'image',dfv))
+        else:
+            df['is_fauna'] = df['detected']
+            is_video = False
 
         for i in range(len(dfvid)):
             dft = dfv[dfv['id'] == dfvid[i]].copy()
@@ -359,9 +364,9 @@ def run_motionmeerkat(df):
                 dft = pd.DataFrame(pd.concat(r_list)).copy()
                 dff_list.append(get_is_fauna(dft,'video',dfv))
 
-        if len(dff_list) > 0:
+        if len(dff_list) > 0 and is_video:
             df = pd.concat(dff_list)
-        else:
+        elif len(dff_list) == 0 and is_video:
             df['is_fauna'] = False
                                     
     elif type(df['frame_array']) == list:

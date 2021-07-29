@@ -1,4 +1,4 @@
-from camtraproc.settings import VIDEO_TYPE, SUBMETHOD, ACCAVG, THRESHT, MOGVAR, MOGLEARNING, MINSIZE
+from camtraproc.settings import VIDEO_TYPE, IMAGE_TYPE, SUBMETHOD, ACCAVG, THRESHT, MOGVAR, MOGLEARNING, MINSIZE
 import numpy as np
 import pandas as pd
 import shapely.geometry as sg
@@ -218,15 +218,18 @@ def run_motionmeerkat(df):
         frames = []
         if SUBMETHOD == 'MOG':
             frames = df[df['item_type'] == VIDEO_TYPE]['frame_array_resized'].to_list()
+            if len(frames) < 1:
+                frames = df[df['item_type'] == IMAGE_TYPE]['frame_array_resized'].to_list()
             bgs = Background(SUBMETHOD,frames[0],ACCAVG,THRESHT,MOGVAR)
-            if len(frames) > 200:
-                for image in frames[:200]:
+            if len(frames) > 130:
+                for image in frames[40:130]:
                     _=bgs.BackGroundSub(image,MOGLEARNING)
             else:
                 for image in frames:
                     _=bgs.BackGroundSub(image,MOGLEARNING)
 
         elif SUBMETHOD == 'Acc':
+            frames = df['frame_array_resized'].to_list()
             first_image = np.median(np.stack(frames, axis=0),axis=0).astype(int)
             bgs = Background(SUBMETHOD,first_image,ACCAVG,THRESHT,MOGVAR)
         else:

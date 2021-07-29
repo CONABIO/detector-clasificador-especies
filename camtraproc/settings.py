@@ -18,6 +18,8 @@ BBOXES_DIR=os.getenv('BBOXES_DIR')
 ITEM_TYPE=os.getenv('ITEM_TYPE')
 ITEM_LIST_ENDPOINT=os.getenv('ITEM_LIST_ENDPOINT')
 ITEM_DETAIL_ENDPOINT=os.getenv('ITEM_DETAIL_ENDPOINT')
+MRUN_LIST_ENDPOINT=os.getenv('MRUN_LIST_ENDPOINT')
+MPRED_ENDPOINT=os.getenv('MPRED_ENDPOINT')
 MODE=os.getenv('MODE')
 USER=os.getenv('USER')
 PSSWD=os.getenv('PSSWD')
@@ -49,3 +51,9 @@ THRESHT=int(os.getenv('THRESHT'))#threshT = 30
 MOGVAR=int(os.getenv('MOGVAR'))#mogvariance = 25
 MOGLEARNING=float(os.getenv('MOGLEARNING'))#moglearning = 0.09 
 MINSIZE=int(os.getenv('MINSIZE'))#200 -> 1/200^2
+MODEL_VERSION=os.getenv('MODEL_VERSION')
+MODEL_RUN=os.getenv('MODEL_RUN')
+ANNOT_TYPE=os.getenv('ANNOT_TYPE')
+EVENT_TYPE_FAUNA=os.getenv('EVENT_TYPE_FAUNA')
+EVENT_TYPE_ANTROP=os.getenv('EVENT_TYPE_ANTROP')
+LABEL=os.getenv('LABEL')

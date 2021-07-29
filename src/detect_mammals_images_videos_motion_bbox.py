@@ -44,11 +44,19 @@ try:
     dfspecies = pd.concat([dflist[0] for dflist in results_list])
     dfhumans = pd.concat([dflist[1] for dflist in results_list])
     dfmaybe_humans = pd.concat([dflist[2] for dflist in results_list])
-    
-    dfhumans = dfhumans[dfhumans['detected'] == True]
-    dfmaybe_humans = dfmaybe_humans[dfmaybe_humans['detected'] == True]
 except Exception as e:
     print('media invalid in {}!'.format(csv_file))
+
+try:
+    dfhumans = dfhumans[dfhumans['detected'] == True]
+except Exception as e:
+    print('no humans in {}!'.format(csv_file))
+
+try:
+    dfmaybe_humans = dfmaybe_humans[dfmaybe_humans['detected'] == True]
+except Exception as e:
+    print('no maybe humans in {}!'.format(csv_file))
+
 
 dft = dfspecies.copy()    
 dfspecies = dfspecies[dfspecies['detected'] == True].drop(['frame_array'],axis=1)
