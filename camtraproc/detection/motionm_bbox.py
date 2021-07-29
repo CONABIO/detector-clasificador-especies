@@ -172,7 +172,7 @@ def is_small(grey_image,width,height,minSIZE,score,oarea,noMotion=False):
                             bound_center.append((x,y))
     
     if len(bound_center) == 0:
-        if score > 0.985 and oarea > 300:
+        if score > 0.985 and oarea > 225:
             noMotion=False
             return noMotion
         else:
