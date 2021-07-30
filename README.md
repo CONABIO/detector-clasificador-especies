@@ -4,7 +4,7 @@
 
 Detects fauna and humans in video frames with [Megadetector](https://github.com/microsoft/CameraTraps/blob/master/megadetector.md). After that we classify 49 species and two genus with an ensemble with one common CNN InceptionResNetV2 headless and five different heads. Some of them uses species occurrences information given coordenates and also potential distribution [*Ceballos, G., S. Blanco, C. González-Salazar, E. Martínez-Meyer. (2006)*](http://www.conabio.gob.mx/informacion/gis/).  
 
-The results of Megadetector are stored in four different csv files:
+The results of Megadetector are stored in three different csv files:
 
 #_species.csv: Contains Megadetector bounding boxes where fauna is located above a specific threshold
 #_humans.csv: Contains Megadetector bounding boxes where humans are located above a specific threshold
