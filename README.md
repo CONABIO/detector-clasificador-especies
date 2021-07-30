@@ -17,7 +17,17 @@ After postprocessing, #_species_after_motionm.csv is written into irekua as pred
 
 ## Deployment
 
-### 1. Set variables file in home
+### 1. Clone thios repo
+```
+git clone https://github.com/CONABIO/detector-clasificador-especies
+```
+
+### 2. Install
+```
+pip install ./detector-clasificador-especies --no-deps
+```
+
+### 3. Set variables file in home
 Create the file `.camtraproc` in your home directory with the following information:
 ```
 NUM_PROCESSES=10 #Number of processes. Usefull to divide the dataset files in different directories 
@@ -70,7 +80,7 @@ EVENT_TYPE_ANTROP=2 # detector's humans or human's activity label id in irekua
 LABEL=2 # any other label id to add in irekua i.e. Animalia
 ```
 
-### 2. Choose postprocessing method (whole image or roi)
+### 4. Choose postprocessing method and run (whole image or roi)
 
 - for whole image:  
 ```
@@ -83,3 +93,4 @@ LABEL=2 # any other label id to add in irekua i.e. Animalia
 
 Inside those bash scripts specify the number of process you will execute (one of the NUM_PROCESSES) in line 4.  
 
+**Note:** you could use the dockerfile attached for deployment
