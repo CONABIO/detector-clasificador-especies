@@ -24,6 +24,8 @@ git clone https://github.com/CONABIO/detector-clasificador-especies
 
 ### 2. Install
 ```
+cd detector-clasificador-especies
+cd checkout MotionMeerkat_postproc
 pip install ./detector-clasificador-especies --no-deps
 ```
 
